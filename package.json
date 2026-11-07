@@ -1,0 +1,39 @@
+{
+  "name": "finance-workspace",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A private, role-aware finance workspace with an isolated interactive demo.",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "prisma generate && tsc",
+    "typecheck": "tsc --noEmit",
+    "db:setup": "prisma migrate deploy",
+    "seed": "tsx prisma/seed.ts",
+    "test": "node scripts/test-api.mjs",
+    "test:e2e": "npm run build && playwright test",
+    "check": "npm run typecheck && npm test && npm run build"
+  },
+  "keywords": [],
+  "author": "Ronack Kumar",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/adapter-libsql": "^7.6.0",
+    "@prisma/client": "^7.6.0",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "express-rate-limit": "^8.2.1",
+    "prisma": "^7.10.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  }
+}

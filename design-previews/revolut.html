@@ -1,0 +1,27 @@
+<!doctype html>
+<!--
+THESIS: Give a small team's finance workspace the confidence and responsiveness of a modern business banking app.
+OWN-WORLD: Neutral graphite and silver, horizontal workspace navigation, open financial sections, and data-first typography.
+STORY: Read the cash position, act on income or expenses, and investigate how money moved.
+FIRST VIEWPORT: Horizontal navigation above an open cash-position view, compact money-movement totals, and a bar-led analysis workspace. Primary actions remain close to their data.
+FORM: User-requested Revolut Business + Brex direction. Explicit reference choice overrides a concept roll. Preview uses labeled synthetic INR data.
+-->
+<html lang="en" data-variant="revolut" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="An interactive finance dashboard design concept inspired by Revolut Business and Brex, using synthetic INR data.">
+  <title>Finance Workspace | Revolut Business + Brex direction</title>
+  <link rel="icon" href="../public/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="preview.css">
+  <link rel="stylesheet" href="refinement.css">
+</head>
+<body>
+  <a href="#main" class="skip">Skip to content</a>
+  <div id="app"></div>
+  <dialog id="drawer" aria-labelledby="drawer-title"></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="preview.js"></script>
+</body>
+</html>

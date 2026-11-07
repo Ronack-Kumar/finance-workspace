@@ -1,0 +1,12 @@
+node_modules
+.git
+.env*
+*.db*
+dist
+data
+tests
+test-results
+playwright-report
+.codex
+design-previews
+coverage

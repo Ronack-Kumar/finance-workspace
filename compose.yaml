@@ -1,0 +1,13 @@
+services:
+  finance:
+    build: .
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      APP_ORIGIN: ${APP_ORIGIN:?Set APP_ORIGIN to your HTTPS public origin}
+      TRUST_PROXY_HOPS: ${TRUST_PROXY_HOPS:-1}
+    volumes:
+      - finance-data:/app/data
+    restart: unless-stopped
+volumes:
+  finance-data:

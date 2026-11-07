@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Finance Workspace | Compare design directions</title>
+  <link rel="icon" href="../public/favicon.svg" type="image/svg+xml">
+  <style>
+    @font-face{font-family:Plex;src:url('../public/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
+    @font-face{font-family:Plex;src:url('../public/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
+    *{box-sizing:border-box}body{margin:0;background:#f5f6f8;color:#252a33;font:15px/1.6 Plex,system-ui,sans-serif}.wrap{max-width:1440px;margin:auto;padding:42px 40px 60px}header{max-width:790px;margin-bottom:34px}header a{color:#56606e;text-decoration:none;font-size:14px}h1{font-size:36px;line-height:1.2;letter-spacing:-.035em;margin:17px 0 14px;font-weight:600}header p{color:#626b78;max-width:700px;margin:0}.options{display:grid;grid-template-columns:1fr 1fr;gap:27px}.option{background:#fff;border-radius:16px;overflow:hidden;border:1px solid #dfe3e9}.image-link{display:block;background:#e9edf3;line-height:0}.image-link img{width:100%;height:auto;display:block;aspect-ratio:1440/1100;object-fit:cover;object-position:top}.copy{padding:25px 27px 27px}h2{font-size:23px;letter-spacing:-.025em;margin:0 0 5px;font-weight:600}.source{color:#626b78;font-size:13px;margin:0 0 17px}.copy>p:not(.source){color:#515c6a;margin:0 0 20px;font-size:14px;min-height:68px}.button{display:inline-flex;align-items:center;gap:16px;padding:11px 17px;border-radius:8px;background:#4c50d5;color:#fff;text-decoration:none;font-size:14px;font-weight:600}.option:nth-child(2) .button{background:#f8a078;color:#2b1c16}.button:hover{filter:brightness(1.07)}a:focus-visible{outline:3px solid #5c63cf;outline-offset:5px}footer{margin-top:28px;color:#626b78;font-size:13px}.mobile-link{display:inline-block;margin-left:15px;font-size:12px;color:#626b78;text-underline-offset:3px}@media(max-width:850px){.wrap{padding:28px 18px 40px}.options{grid-template-columns:1fr;gap:24px}h1{font-size:30px}.copy{padding:22px}.copy>p:not(.source){min-height:0}}@media(prefers-color-scheme:dark){body{background:#101319;color:#eef1f7}.option{background:#1a1e27;border-color:#343b49}header a,header p,.source,.copy>p:not(.source),footer,.mobile-link{color:#a9b2c2}.image-link{background:#222936}}
+  </style>
+  <style>
+    .motion-controls{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:22px;font-size:13px;color:#626b78}
+    .motion-controls button{font:600 13px Plex,system-ui,sans-serif;border:1px solid #c8cdd7;border-radius:8px;background:#fff;color:#252a33;padding:8px 13px;cursor:pointer;min-height:38px}
+    .motion-controls button:disabled{opacity:.6;cursor:default}
+    .motion-controls button:focus-visible{outline:3px solid #5c63cf;outline-offset:3px}
+    .live-preview{position:relative;display:block;width:100%;aspect-ratio:1440/1100;overflow:hidden}
+    .live-preview iframe{position:absolute;left:0;top:0;width:1440px;height:1100px;border:0;transform-origin:top left;transform:scale(var(--preview-scale,.45));pointer-events:none;background:#f7f8fa}
+    @media(prefers-color-scheme:dark){.motion-controls{color:#a9b2c2}.motion-controls button{background:#1a1e27;color:#eef1f7;border-color:#515b6d}}
+  </style>
+  <link rel="stylesheet" href="refinement.css">
+</head>
+<body class="choice-page">
+  <main class="wrap">
+    <header>
+      <a href="index.html">Finance Workspace</a>
+      <h1>Two directions for your finance workspace.</h1>
+      <p>The charts continuously guide you through the same synthetic INR data. Watch the period spotlight, income/expense/net callouts, and spending-category focus, or open either design to interact.</p>
+      <div class="motion-controls"><button id="motion-toggle" type="button" aria-pressed="true">Pause chart motion</button><span id="motion-status" role="status">Continuous focus explains each period and spending category.</span></div>
+    </header>
+    <div class="options">
+      <article class="option">
+        <a class="image-link" href="mercury.html" aria-label="Open the Mercury and Stripe inspired interactive preview"><span class="live-preview"><iframe src="mercury.html?embed=1" title="Mercury and Stripe inspired live motion preview" tabindex="-1" aria-hidden="true" scrolling="no"></iframe></span></a>
+        <div class="copy"><h2>01. The financial workbench</h2><p class="source">Mercury + Stripe direction</p><p>Balances, cash flow, and a spending ledger share one compact workspace. White surfaces, fine rules, and restrained green financial signals keep the records in focus.</p><a class="button" href="mercury.html">Open interactive preview <span aria-hidden="true">&#8599;&#65038;</span></a><a class="mobile-link" href="shots/mercury-mobile.png">Mobile view</a></div>
+      </article>
+      <article class="option">
+        <a class="image-link" href="revolut.html" aria-label="Open the Revolut Business and Brex inspired interactive preview"><span class="live-preview"><iframe src="revolut.html?embed=1" title="Revolut Business and Brex inspired live motion preview" tabindex="-1" aria-hidden="true" scrolling="no"></iframe></span></a>
+        <div class="copy"><h2>02. The cash-position view</h2><p class="source">Revolut Business + Brex direction</p><p>Horizontal navigation, an open balance summary, and bar-led analysis. Graphite and silver establish the hierarchy, with income and expense actions beside the balance.</p><a class="button" href="revolut.html">Open interactive preview <span aria-hidden="true">&#8599;&#65038;</span></a><a class="mobile-link" href="shots/revolut-mobile.png">Mobile view</a></div>
+      </article>
+    </div>
+    <footer>These are interactive design concepts, not the connected production application. Demo edits reset on reload. Both include light/dark themes and reduced-motion support.</footer>
+  </main>
+  <script>
+    const frames=[...document.querySelectorAll('.live-preview iframe')];
+    const preference=matchMedia('(prefers-reduced-motion: reduce)');
+    const button=document.querySelector('#motion-toggle');
+    const status=document.querySelector('#motion-status');
+    const visible=new Map(frames.map(frame=>[frame,true]));
+    let playing=!preference.matches;
+    function send(frame){frame.contentWindow?.postMessage({type:'finance-preview:motion',playing:playing&&!preference.matches&&!document.hidden&&visible.get(frame)},location.origin);}
+    function update(){button.disabled=preference.matches;button.setAttribute('aria-pressed',String(playing));button.textContent=playing?'Pause chart motion':'Resume chart motion';status.textContent=preference.matches?'Your device requests reduced motion; insights remain visible without motion.':playing?'Continuous focus explains each period and spending category.':'Chart focus paused. All figures remain visible.';frames.forEach(send);}
+    const resize=new ResizeObserver(entries=>entries.forEach(entry=>entry.target.style.setProperty('--preview-scale',String(entry.contentRect.width/1440))));
+    document.querySelectorAll('.live-preview').forEach(el=>resize.observe(el));
+    const observer=new IntersectionObserver(entries=>{for(const entry of entries){const frame=entry.target.querySelector('iframe');visible.set(frame,entry.isIntersecting);send(frame);}},{threshold:.05});
+    frames.forEach(frame=>{observer.observe(frame.parentElement);frame.addEventListener('load',()=>send(frame));});
+    window.addEventListener('message',event=>{if(event.origin!==location.origin||event.data?.type!=='finance-preview:ready')return;const frame=frames.find(frame=>frame.contentWindow===event.source);if(frame)send(frame);});
+    button.addEventListener('click',()=>{playing=!playing;update();});
+    document.addEventListener('visibilitychange',update);
+    preference.addEventListener('change',()=>{if(preference.matches)playing=false;update();});
+    update();
+  </script>
+</body>
+</html>

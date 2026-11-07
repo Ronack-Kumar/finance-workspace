@@ -1,0 +1,10 @@
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { spawn, execFileSync } from 'node:child_process';
+const directory=await mkdtemp(join(tmpdir(),'finance-e2e-'));
+const env={...process.env,DATABASE_URL:`file:${join(directory,'test.db')}`,APP_ORIGIN:'http://127.0.0.1:4318',PORT:'4318',HOST:'127.0.0.1',NODE_ENV:'test'};
+execFileSync(process.execPath,[resolve('node_modules/prisma/build/index.js'),'migrate','deploy'],{env,stdio:'inherit'});
+const child=spawn(process.execPath,['dist/index.js'],{env,stdio:'inherit'});
+for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>child.kill(signal));
+child.on('exit',async code=>{await rm(directory,{recursive:true,force:true,maxRetries:5,retryDelay:100});process.exit(code??0);});

@@ -1,0 +1,27 @@
+<!doctype html>
+<!--
+THESIS: Make reviewing cash flow and recording an expense feel precise and effortless.
+OWN-WORLD: White and ink, fine data rules, restrained green financial signals, and a transaction-led workbench.
+STORY: Understand the balance, compare inflows and outflows, inspect recent entries, then add a record.
+FIRST VIEWPORT: A compact sidebar and one financial workbench combining balances, trends, and an expense ledger, with recent records directly below. Add transaction sits in the page header.
+FORM: User-requested Mercury + Stripe direction. Explicit reference choice overrides a concept roll. Preview uses labeled synthetic INR data.
+-->
+<html lang="en" data-variant="mercury" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="An interactive finance dashboard design concept inspired by Mercury and Stripe, using synthetic INR data.">
+  <title>Finance Workspace | Mercury + Stripe direction</title>
+  <link rel="icon" href="../public/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="preview.css">
+  <link rel="stylesheet" href="refinement.css">
+</head>
+<body>
+  <a href="#main" class="skip">Skip to content</a>
+  <div id="app"></div>
+  <dialog id="drawer" aria-labelledby="drawer-title"></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="preview.js"></script>
+</body>
+</html>
