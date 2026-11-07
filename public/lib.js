@@ -11,15 +11,20 @@ export const dateLabel = value => new Date(value+'T00:00:00Z').toLocaleDateStrin
 export const initials = name => name.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
 export const preference = matchMedia('(prefers-reduced-motion: reduce)');
 export const palette = () => document.documentElement.dataset.theme === 'dark' ? ['#d9e0dc','#acb9b1','#7e9186','#52675b'] : ['#2f5644','#617e6d','#96ab9c','#c3cec6'];
+let themeFrame;
 export function applyTheme(theme) {
+  cancelAnimationFrame(themeFrame);
+  document.documentElement.classList.add('theme-changing');
   document.documentElement.dataset.theme=theme;
+  void document.documentElement.offsetHeight;
+  themeFrame=requestAnimationFrame(()=>document.documentElement.classList.remove('theme-changing'));
   try { localStorage.setItem('finance.theme',theme); } catch {}
 }
 try { applyTheme(localStorage.getItem('finance.theme') || (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light')); } catch {}
-export class ApiError extends Error { constructor(status,message) { super(message); this.status=status; } }
+export class ApiError extends Error { constructor(status,message,details=[]) { super(message); this.status=status; this.details=details; } }
 export async function api(path,{method='GET',body,signal,download=false}={}) {
   const res=await fetch('/api'+path,{method,credentials:'same-origin',signal,headers:body===undefined?{}:{'Content-Type':'application/json'},body:body===undefined?undefined:JSON.stringify(body)});
-  if(!res.ok){const error=await res.json().catch(()=>({error:'The server could not complete the request.'}));throw new ApiError(res.status,error.error);}
+  if(!res.ok){const error=await res.json().catch(()=>({error:'The server could not complete the request.'}));throw new ApiError(res.status,error.error,error.details);}
   if(download)return res.blob();
   return res.status===204?null:res.json();
 }

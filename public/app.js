@@ -3,7 +3,7 @@ import { summary, chartPanel, categoryPanel, bindCharts, stopCharts, syncCharts,
 
 const root=document.querySelector('#root'),drawer=document.querySelector('#drawer');
 const state={me:null,view:'home',report:null,records:{data:[],total:0,page:1,totalPages:0},team:null,query:'',type:'',sort:'date-desc',deleted:false,page:1,period:'6',start:'',end:today(),invitation:null};
-let controller,loadNumber=0,searchTimer,toastTimer,returnFocus,focusSearch=false;
+let controller,loadNumber=0,searchTimer,toastTimer,toastReturnFocus,returnFocus,focusSearch=false;
 const brand=`<a class="brand" href="#home"><span class="brand-mark brand-monogram" aria-hidden="true">FW</span><span class="brand-word">Finance<span>Workspace</span></span></a>`;
 const isAdmin=()=>state.me?.role==='ADMIN';
 const canRead=()=>['ADMIN','ANALYST'].includes(state.me?.role);
@@ -32,15 +32,67 @@ function team(){return head('Team','Manage who can see and change this workspace
 function field(label,name,value='',type='text',extra=''){return `<div class="field"><label for="${name}">${label}</label><input id="${name}" name="${name}" type="${type}" value="${esc(value)}" ${extra}></div>`;}
 const errorBlock='<p class="form-error" role="alert"></p>';
 function settings(){const m=state.me;return head('Settings','Your profile and workspace preferences.',' ')+`<div class="settings-grid"><section><h2>Profile</h2><form id="profile-form" class="settings-form">${field('Full name','name',m.user.name,'text','required minlength="2" maxlength="80" autocomplete="name"')}${field('Email','email',m.user.email,'email','readonly')}${errorBlock}<button class="button">Save profile</button></form>${!m.user.isDemo?`<h2 class="settings-section">Change password</h2><form id="password-form" class="settings-form">${field('Current password','currentPassword','','password','required autocomplete="current-password"')}${field('New password','newPassword','','password','required minlength="12" autocomplete="new-password"')}<p class="hint">At least 12 characters. Other sessions will be signed out.</p>${errorBlock}<button class="button secondary">Update password</button></form>`:''}</section><section><h2>Workspace</h2><form id="workspace-form" class="settings-form">${field('Workspace name','workspaceName',m.workspace.name,'text',`required minlength="2" maxlength="80" ${!isAdmin()?'readonly':''}`)}${field('Currency','currency','INR · Indian rupee','text','readonly')}${isAdmin()?errorBlock+'<button class="button">Save workspace</button>':'<p class="hint">Only administrators can change workspace settings.</p>'}</form><h2 class="settings-section">Appearance</h2><div class="theme-options">${button('theme',icon('sun')+'Switch to '+(document.documentElement.dataset.theme==='dark'?'light':'dark')+' theme','secondary')}</div><h2 class="settings-section">Session</h2><p class="muted settings-copy">${m.workspace.isDemo?'Demo edits are isolated and expire after 24 hours.':'Your session lasts up to seven days. Sign out on shared devices.'}</p>${button('logout','Sign out','secondary')}${m.workspace.isDemo?button('demo','Start a fresh demo','text'):''}</section></div>`;}
-function landing(){return `<div class="public-page"><header class="public-header">${brand}<nav><a href="#sign-in">Sign in</a><a class="button" href="#sign-up">Create workspace</a></nav></header><main id="main"><section class="landing-intro"><div><span class="eyebrow">A clearer view of the numbers</span><h1>Your finances,<br>in one clear view.</h1><p>Track income and expenses, see what changed, and give your team the right access. A focused workspace for the way small teams work.</p><div class="landing-actions">${button('demo','Explore the live demo '+icon('arrow-up-right'))}<a class="button secondary" href="#sign-up">Create your workspace</a></div><p class="demo-disclosure">No sign-up needed for the demo. Every visitor gets a private set of synthetic records.</p></div><figure class="product-window"><img src="/screens/workspace.png" alt="Finance Workspace showing a synthetic INR cash-flow report and transaction ledger" width="1440" height="1000"><figcaption>Product preview · Synthetic demonstration data</figcaption></figure></section><section class="product-notes"><div><h2>Know where it goes</h2><p>Income, expenses, and category breakdowns with guided chart insights.</p></div><div><h2>Keep the details close</h2><p>Search, filter, edit, and export your records with accurate decimal amounts.</p></div><div><h2>Work as a team</h2><p>Private workspaces with Admin, Analyst, and Viewer permissions.</p></div></section></main><footer class="public-footer"><span>Finance Workspace · Built by Ronack Kumar</span><a href="https://github.com/Ronack-Kumar/finance-workspace" target="_blank" rel="noopener noreferrer">Source on GitHub ${icon('arrow-up-right')}</a></footer></div>`;}
-function authView(signup=false,invitation=null){return `<div class="public-page"><header class="public-header">${brand}<a href="#home">Back to home</a></header><main class="auth-layout" id="main"><section class="auth-aside"><span class="eyebrow">${invitation?'Your team is waiting':'Finance Workspace'}</span><h1>${invitation?'Join your team.':signup?'A fresh start for your finances.':'Welcome back.'}</h1><p>${invitation?`You’re invited to ${esc(invitation.workspace)} as ${invitation.role.toLowerCase()}. Use the invited email to continue.`:'Keep income, expenses, and the whole team on the same page.'}</p><a href="#home">Explore the product ${icon('arrow-right')}</a></section><section class="auth-card"><h2>${signup?'Create your account':'Sign in'}</h2><form id="${signup?'register-form':'login-form'}">${signup?field('Full name','name','','text','required minlength="2" maxlength="80" autocomplete="name"'):''}${field('Email address','email',invitation?.email||'','email',`required autocomplete="email" ${invitation?'readonly':''}`)}${field('Password','password','','password',`required ${signup?'minlength="12"':''} autocomplete="${signup?'new-password':'current-password'}"`)}${signup&&!invitation?field('Workspace name','workspace','','text','required minlength="2" maxlength="80" placeholder="e.g. Studio North"'):''}${signup?'<p class="hint">Use at least 12 characters for your password.</p>':''}${errorBlock}<button class="button" type="submit">${signup?invitation?'Create account and join':'Create workspace':'Sign in'}</button></form><p class="auth-switch">${signup?'Already have an account?':'New here?'} <a href="${invitation?'#join/'+state.invitation.token+(signup?'/login':'') : signup?'#sign-in':'#sign-up'}">${signup?'Sign in':'Create an account'}</a></p>${!invitation?`<div class="auth-demo">${button('demo','Try the demo instead','text')}</div>`:''}</section></main></div>`;}
+function landing(){return `<div class="public-page editorial-page">
+  <header class="public-header">${brand}<nav aria-label="Account"><a href="#sign-in">Sign in</a><a class="button secondary" href="#sign-up">Create workspace</a></nav></header>
+  <main id="main">
+    <section class="landing-story">
+      <div class="landing-heading"><h1>Every number.<br><span>A clearer picture.</span></h1></div>
+      <div class="landing-summary"><p>Income, spending, and the detail behind both. A calm place for small teams to manage finances and stay on the same page.</p>
+        <div class="landing-actions">${button('demo','Explore the live demo '+icon('arrow-up-right'))}<a class="landing-secondary" href="#sign-up">Create your workspace ${icon('arrow-right')}</a></div>
+        <p class="demo-disclosure">No sign-up needed. Explore a private workspace with synthetic INR records.</p>
+      </div>
+    </section>
+    <section class="product-showcase" aria-labelledby="showcase-title">
+      <div class="showcase-heading"><h2 id="showcase-title">The whole picture, with the details close.</h2></div>
+      <figure class="product-window">
+        <div class="window-caption"><span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span><span>Finance Workspace</span><span class="window-demo">Demo studio · INR</span></div>
+        <picture><source media="(max-width: 680px)" srcset="/screens/cashflow-mobile.png" width="339" height="444"><img src="/screens/workspace.png" alt="Finance Workspace preview with synthetic INR income, expenses, and cash-flow insights" width="1440" height="1000" fetchpriority="high"></picture>
+        <figcaption><span>Real product screens. Synthetic demonstration data.</span><a href="#sign-up">Make it your workspace ${icon('arrow-up-right')}</a></figcaption>
+      </figure>
+    </section>
+    <section class="product-notes" aria-label="What you can do">
+      <div><h2>Read the movement.</h2><p>Follow income, expenses, and net movement with continuous chart insights and exact period values.</p></div>
+      <div><h2>Find the detail.</h2><p>Search your ledger, edit a record, or export the numbers. Amounts stay accurate to the paise.</p></div>
+      <div><h2>Bring your team.</h2><p>Invite teammates into a private workspace with the right level of access for each person.</p></div>
+    </section>
+  </main>
+  <footer class="public-footer"><span>Finance Workspace · Built by Ronack Kumar</span><a href="https://github.com/Ronack-Kumar/finance-workspace" target="_blank" rel="noopener noreferrer">Source on GitHub ${icon('arrow-up-right')}</a></footer>
+</div>`;}
+function authView(signup=false,invitation=null){return `<div class="public-page">
+  <header class="public-header">${brand}<a href="#home">Back to home</a></header>
+  <main class="auth-layout" id="main">
+    <section class="auth-aside"><h1>${invitation?'Join your team.':signup?'A fresh start for your finances.':'Welcome back.'}</h1><p>${invitation?`You’re invited to ${esc(invitation.workspace)} as ${invitation.role.toLowerCase()}. Use the invited email to continue.`:'Keep income, expenses, and the whole team on the same page.'}</p><a href="#home">Explore the product ${icon('arrow-right')}</a></section>
+    <section class="auth-card"><h2>${signup?'Create your account':'Sign in'}</h2>
+      <form id="${signup?'register-form':'login-form'}">
+        ${signup?field('Full name','name','','text','required minlength="2" maxlength="80" autocomplete="name"'):''}
+        ${field('Email address','email',invitation?.email||'','email',`required autocomplete="email" ${invitation?'readonly':''}`)}
+        ${field('Password','password','','password',`required ${signup?'minlength="12" aria-describedby="password-hint"':''} autocomplete="${signup?'new-password':'current-password'}"`)}
+        ${signup?'<p class="hint" id="password-hint">Use at least 12 characters for your password.</p>':''}
+        ${signup&&!invitation?field('Workspace name','workspace','','text','required minlength="2" maxlength="80" placeholder="e.g. Studio North"'):''}
+        ${errorBlock}<button class="button" type="submit">${signup?invitation?'Create account and join':'Create workspace':'Sign in'}</button>
+      </form>
+      <p class="auth-switch">${signup?'Already have an account?':'New here?'} <a href="${invitation?'#join/'+state.invitation.token+(signup?'/login':'') : signup?'#sign-in':'#sign-up'}">${signup?'Sign in':'Create an account'}</a></p>
+      ${!invitation?`<div class="auth-demo">${button('demo','Try the demo instead','text')}</div>`:''}
+    </section>
+  </main>
+</div>`;}
 
-function render(content){stopCharts();root.innerHTML=content;document.body.classList.toggle('is-demo',Boolean(state.me?.workspace.isDemo&&pageNames[state.view]));}
+function render(content){stopCharts();root.innerHTML=content;document.querySelector('.skip').inert=false;document.body.classList.toggle('is-demo',Boolean(state.me?.workspace.isDemo&&pageNames[state.view]));}
+function focusView(){const heading=root.querySelector('h1');if(heading){heading.tabIndex=-1;heading.focus({preventScroll:true});}}
+function focusKey(element){
+  if(!element||!root.contains(element))return null;
+  if(element.id)return '#'+CSS.escape(element.id);
+  if(element.dataset.control)return `[data-control="${CSS.escape(element.dataset.control)}"]`;
+  if(element.dataset.action)return `[data-action="${CSS.escape(element.dataset.action)}"]${element.dataset.id?`[data-id="${CSS.escape(element.dataset.id)}"]`:''}`;
+  if(element.form?.id&&element.matches('button[type=submit],button:not([type])'))return `#${CSS.escape(element.form.id)} button:is([type=submit],:not([type]))`;
+  return null;
+}
 function renderApp(){render(shell(({overview,transactions,reports,team,settings}[state.view]||overview)()));if(state.report&&['overview','reports'].includes(state.view))bindCharts(state.report);document.title=`${pageNames[state.view]} · Finance Workspace`;}
 function showError(error){render(state.me?shell(head(pageNames[state.view]||'Workspace','', ' ')+empty('Couldn’t load this view',esc(error.message),button('refresh','Try again','secondary'))):`<main class="boot" id="main">${empty('Couldn’t connect',esc(error.message),button('refresh','Try again','secondary'))}</main>`);}
 async function load({keep=false}={}){
+  const initialLoad=loadNumber===0;
   const number=++loadNumber;controller?.abort();controller=new AbortController();const signal=controller.signal;
-  const active=document.activeElement,focusId=keep?active?.id:null,selection=focusId?active.selectionStart:null;
+  const active=document.activeElement,focusSelector=keep?focusKey(active):null,selection=focusSelector?active.selectionStart:null;
   const scroll=keep?window.scrollY:0;
   const path=location.hash.slice(1).split('/'),requested=path[0];
   if(!keep)render(state.me&&pageNames[requested]?shell('<div class="loading-view" role="status">Loading workspace…</div>'):'<main class="boot" id="main" role="status">Loading…</main>');
@@ -52,11 +104,11 @@ async function load({keep=false}={}){
       const token=path[1];const invitation=await api('/team/invitation/'+encodeURIComponent(token||''),{signal});if(number!==loadNumber)return;
       state.invitation={...invitation,token};
       if(me&&!me.user.isDemo)render(`<div class="public-page"><header class="public-header">${brand}</header><main class="join-card" id="main"><h1>Join ${esc(invitation.workspace)}</h1><p>Invited as ${invitation.role.toLowerCase()} · ${esc(invitation.email)}</p><p>Signed in as ${esc(me.user.email)}</p>${me.user.email===invitation.email?button('accept','Join workspace'):button('logout','Sign out to use the invited account','secondary')}<p id="join-error" class="form-error" role="alert"></p></main></div>`);
-      else render(authView(path[2]!=='login',invitation));return;
+      else render(authView(path[2]!=='login',invitation));document.title=`Join ${invitation.workspace} · Finance Workspace`;if(!initialLoad)focusView();return;
     }
     state.invitation=null;
-    if(['home','sign-in','sign-up'].includes(state.view)){render(state.view==='home'?landing():authView(state.view==='sign-up'));document.title='Finance Workspace';return;}
-    if(!me){state.view='sign-in';render(authView());return;}
+    if(['home','sign-in','sign-up'].includes(state.view)){render(state.view==='home'?landing():authView(state.view==='sign-up'));document.title=state.view==='home'?'Finance Workspace':`${state.view==='sign-up'?'Create account':'Sign in'} · Finance Workspace`;if(!initialLoad)focusView();return;}
+    if(!me){state.view='sign-in';render(authView());document.title='Sign in · Finance Workspace';if(!initialLoad)focusView();return;}
     if(!pageNames[state.view]||state.view==='team'&&!canTeam()||state.view==='transactions'&&!canRead()){location.hash='overview';return;}
     const jobs=[];
     if(['overview','reports'].includes(state.view))jobs.push(api('/dashboard?'+params(),{signal}).then(v=>{if(number===loadNumber)state.report=v;}));
@@ -68,28 +120,53 @@ async function load({keep=false}={}){
     await Promise.all(jobs);if(number!==loadNumber)return;
     if(state.view==='transactions'&&state.page>Math.max(1,state.records.totalPages)){state.page=Math.max(1,state.records.totalPages);await load({keep});return;}
     renderApp();
-    if(focusId){const input=document.getElementById(focusId);input?.focus({preventScroll:true});if(input?.setSelectionRange&&selection!==null)input.setSelectionRange(selection,selection);}
+    if(focusSelector){const input=root.querySelector(focusSelector);if(input&&!input.disabled){input.focus({preventScroll:true});if(input.setSelectionRange&&typeof selection==='number')input.setSelectionRange(selection,selection);}else focusView();}
     window.scrollTo({top:scroll,behavior:'instant'});
     if(focusSearch){document.querySelector('#transaction-search')?.focus();focusSearch=false;}
+    else if(!keep&&!initialLoad)focusView();
   }catch(error){if(error.name!=='AbortError'&&number===loadNumber)showError(error);}
 }
-function toast(message){const node=document.querySelector('#toast');node.textContent=message;node.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>node.classList.remove('visible'),4500);}
+function dismissToast(){const node=document.querySelector('#toast'),restore=node.contains(document.activeElement);clearTimeout(toastTimer);node.classList.remove('visible');node.replaceChildren();if(restore){const target=toastReturnFocus&&root.querySelector(toastReturnFocus);if(target&&!target.disabled)target.focus({preventScroll:true});else focusView();}toastReturnFocus=null;}
+function toast(message,{persistent=false,returnTo=document.activeElement}={}){const node=document.querySelector('#toast');clearTimeout(toastTimer);toastReturnFocus=focusKey(returnTo);node.setAttribute('role',persistent?'alert':'status');node.setAttribute('aria-live',persistent?'assertive':'polite');node.innerHTML=`<span>${esc(message)}</span>${persistent?`<button class="icon-button" data-action="dismiss-toast" aria-label="Dismiss notification">${icon('x')}</button>`:''}`;node.classList.add('visible');if(!persistent)toastTimer=setTimeout(dismissToast,4500);}
 function navigate(view){if(location.hash==='#'+view)load();else location.hash=view;}
 function openDrawer(title,subtitle,content){returnFocus=document.activeElement;drawer.innerHTML=`<div class="drawer-inner"><div class="drawer-head"><div><h2 id="drawer-title">${esc(title)}</h2><p>${esc(subtitle)}</p></div><button class="icon-button" data-action="close" aria-label="Close panel">${icon('x')}</button></div>${content}</div>`;drawer.showModal();syncCharts();if(!preference.matches)drawer.querySelector('.drawer-inner').animate([{opacity:.5,transform:'translateX(18px)'},{opacity:1,transform:'translateX(0)'}],{duration:220,easing:'ease-out'});}
 function closeDrawer(){drawer.close();drawer.innerHTML='';syncCharts();if(returnFocus?.isConnected)returnFocus.focus();}
 function recordDrawer(record=null){const categories=[...new Set(['Consulting','Projects','Payroll','Rent','Software','Hosting','Marketing','Travel','Other',record?.category].filter(Boolean))];openDrawer(record?'Edit transaction':'Add transaction',state.me.workspace.isDemo?'Changes affect only your synthetic demo.':'Amounts are saved in INR, to the paise.',`<form id="record-form" class="drawer-form" data-id="${record?.id||''}" data-version="${record?.version||''}"><div class="field"><label for="record-type">Type</label><select id="record-type" name="type"><option value="EXPENSE" ${record?.type==='EXPENSE'?'selected':''}>Expense</option><option value="INCOME" ${record?.type==='INCOME'?'selected':''}>Income</option></select></div>${field('Amount in INR','amount',record?decimal(record.amountMinor):'','text','required inputmode="decimal" autocomplete="off" placeholder="0.00"')}${field('Description','description',record?.description||'','text','required maxlength="200" placeholder="e.g. Client retainer"')}<div class="field-row"><div class="field"><label for="category">Category</label><input id="category" name="category" list="category-options" value="${esc(record?.category||'')}" required maxlength="50" placeholder="Choose or type"><datalist id="category-options">${categories.map(c=>`<option value="${esc(c)}"></option>`).join('')}</datalist></div>${field('Date','date',record?.date||today(),'date',`required max="${today()}" min="1900-01-01"`)}</div>${errorBlock}<div class="drawer-footer"><button type="button" class="button secondary" data-action="close">Cancel</button><button class="button">${record?'Save changes':'Add transaction'}</button></div>${record?`<button type="button" class="button text expense" data-action="delete" data-id="${record.id}" data-version="${record.version}">Delete transaction</button><p class="hint">Deleted records can be restored from the transactions page.</p>`:''}</form>`);}
 function inviteDrawer(){openDrawer('Invite a teammate','Create a single-use link valid for seven days. Share it directly with the invited person.',`<form id="invite-form" class="drawer-form">${field('Email address','inviteEmail','','email','required')}<div class="field"><label for="inviteRole">Role</label><select name="inviteRole" id="inviteRole"><option value="VIEWER">Viewer</option><option value="ANALYST">Analyst</option><option value="ADMIN">Admin</option></select></div>${errorBlock}<button class="button">Create invitation link</button></form>`);}
 function memberDrawer(id){const m=state.team.members.find(m=>m.id===id);openDrawer('Manage access',m.user.name,`<form id="member-form" class="drawer-form" data-id="${id}"><div class="field"><label for="memberRole">Role</label><select id="memberRole" name="role">${['ADMIN','ANALYST','VIEWER'].map(r=>`<option ${r===m.role?'selected':''}>${r}</option>`).join('')}</select></div><label class="checkbox-field"><input type="checkbox" name="isActive" ${m.isActive?'checked':''}>Active workspace access</label><p class="hint">Changes take effect on existing sessions. A workspace must retain at least one active admin.</p>${errorBlock}<button class="button">Save access</button></form>`);}
-async function busy(button,task){if(button.disabled)return;button.disabled=true;button.setAttribute('aria-busy','true');try{await task();}catch(error){const box=drawer.open?drawer.querySelector('.form-error'):document.querySelector('#join-error');if(box)box.textContent=error.message;else toast(error.message);}finally{if(button.isConnected){button.disabled=false;button.removeAttribute('aria-busy');}}}
+function showFormError(form,error){
+  const box=form.querySelector('.form-error');if(!box)throw error;
+  box.id=`${form.id}-error`;box.textContent=error.message;
+  const aliases={name:'workspaceName',email:'inviteEmail',role:'inviteRole'};
+  const path=Array.isArray(error.details)?error.details.find(detail=>detail.path?.length)?.path[0]:null;
+  const field=path&&(form.elements.namedItem(path)||form.elements.namedItem(aliases[path]));
+  if(field?.focus){field.setAttribute('aria-invalid','true');field.setAttribute('aria-describedby',[field.getAttribute('aria-describedby'),box.id].filter(Boolean).join(' '));field.focus();}
+  else{box.tabIndex=-1;box.focus();}
+}
+async function busy(button,task){if(button.disabled)return;button.disabled=true;button.setAttribute('aria-busy','true');try{await task();}catch(error){const form=drawer.open?drawer.querySelector('form'):null,box=document.querySelector('#join-error');if(form)showFormError(form,error);else if(box){box.textContent=error.message;box.tabIndex=-1;box.focus();}else toast(error.message,{persistent:true,returnTo:button});}finally{if(button.isConnected){button.disabled=false;button.removeAttribute('aria-busy');}}}
+function setNavigation(open){
+  const shell=root.querySelector('.shell'),sidebar=root.querySelector('.sidebar');if(!shell||!sidebar)return;
+  shell.classList.toggle('nav-open',open);sidebar.inert=!open&&innerWidth<=760;
+  shell.querySelector('.body').inert=open;const banner=root.querySelector('.demo-banner');if(banner)banner.inert=open;
+  document.querySelector('.skip').inert=open;
+  const toggle=shell.querySelector('.mobile-toggle');toggle.setAttribute('aria-expanded',String(open));
+  (open?sidebar.querySelector('.nav a'):toggle)?.focus();
+}
 
 document.addEventListener('click',event=>{
+  if(event.target.closest('.skip')){event.preventDefault();const main=root.querySelector('main');if(main){main.tabIndex=-1;main.focus();main.scrollIntoView({block:'start'});}return;}
   const b=event.target.closest('[data-action]');if(!b)return;
   const action=b.dataset.action;
+  if(action==='dismiss-toast'){dismissToast();return;}
   if(action==='close'){closeDrawer();return;}
   if(action==='motion'){toggleCharts();return;}
-  if(action==='menu-open'){document.querySelector('.sidebar').inert=false;document.querySelector('.shell').classList.add('nav-open');document.querySelector('.sidebar .nav a')?.focus();return;}
-  if(action==='menu-close'){document.querySelector('.shell').classList.remove('nav-open');document.querySelector('.sidebar').inert=innerWidth<=760;document.querySelector('.mobile-toggle')?.focus();return;}
-  if(action==='theme'){applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');if(state.me&&pageNames[state.view])renderApp();return;}
+  if(action==='menu-open'){setNavigation(true);return;}
+  if(action==='menu-close'){setNavigation(false);return;}
+  if(action==='theme'){
+    const theme=document.documentElement.dataset.theme==='dark'?'light':'dark';applyTheme(theme);
+    root.querySelectorAll('[data-action=theme]').forEach(control=>{control.innerHTML=control.classList.contains('icon-button')?icon(theme==='dark'?'sun':'moon'):icon('sun')+'Switch to '+(theme==='dark'?'light':'dark')+' theme';});
+    const categories=root.querySelector('.category-panel');if(categories&&state.report){categories.outerHTML=categoryPanel(state.report);bindCharts(state.report);}return;
+  }
   if(action==='add'){recordDrawer();return;}
   if(action==='invite'){inviteDrawer();return;}
   if(action==='member'){memberDrawer(b.dataset.id);return;}
@@ -118,7 +195,7 @@ document.addEventListener('click',event=>{
 function resetFilters(){state.query='';state.type='';state.deleted=false;state.page=1;choosePeriod('6');}
 document.addEventListener('change',event=>{
   const c=event.target.dataset.control;if(!c)return;
-  if(c==='period'){if(event.target.value==='custom'){state.period='custom';renderApp();return;}choosePeriod(event.target.value);}
+  if(c==='period'){if(event.target.value==='custom'){state.period='custom';renderApp();root.querySelector('.date-range input')?.focus();return;}choosePeriod(event.target.value);}
   if(c==='type')state.type=event.target.value;
   if(c==='sort')state.sort=event.target.value;
   if(c==='deleted')state.deleted=event.target.checked;
@@ -128,6 +205,7 @@ document.addEventListener('input',event=>{if(event.target.id==='transaction-sear
 document.addEventListener('submit',event=>{
   const form=event.target;if(!form.id.endsWith('-form'))return;event.preventDefault();
   const b=form.querySelector('button[type=submit],button:not([type])');const error=form.querySelector('.form-error');if(error)error.textContent='';
+  form.querySelectorAll('[aria-invalid=true]').forEach(field=>{field.removeAttribute('aria-invalid');const descriptions=(field.getAttribute('aria-describedby')||'').split(' ').filter(id=>id&&id!==error?.id);if(descriptions.length)field.setAttribute('aria-describedby',descriptions.join(' '));else field.removeAttribute('aria-describedby');});
   busy(b,async()=>{try{
     const d=Object.fromEntries(new FormData(form));
     switch(form.id){
@@ -142,13 +220,15 @@ document.addEventListener('submit',event=>{
       case 'switch-form':await api('/auth/switch',{method:'POST',body:d});closeDrawer();resetFilters();navigate('overview');break;
       case 'range-form':if(d.start>d.end)throw new Error('Start date must come before end date.');state.start=d.start;state.end=d.end;state.page=1;await load({keep:true});break;
     }
-  }catch(err){if(error?.isConnected)error.textContent=err.message;else throw err;}});
+  }catch(err){if(error?.isConnected)showFormError(form,err);else throw err;}});
 });
 drawer.addEventListener('cancel',event=>{event.preventDefault();closeDrawer();});
 drawer.addEventListener('click',event=>{if(event.target===drawer){const r=drawer.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right)closeDrawer();}});
 document.addEventListener('keydown',event=>{
   if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'&&canRead()){event.preventDefault();focusSearch=true;navigate('transactions');}
-  if(event.key==='Escape'&&document.querySelector('.nav-open'))document.querySelector('[data-action=menu-close]').click();
+  const nav=root.querySelector('.nav-open .sidebar');
+  if(event.key==='Escape'&&nav)setNavigation(false);
+  if(event.key==='Tab'&&nav&&!drawer.open){const items=[...nav.querySelectorAll('a[href],button:not(:disabled)')],first=items[0],last=items.at(-1);if(event.shiftKey&&(document.activeElement===first||!nav.contains(document.activeElement))){event.preventDefault();last.focus();}else if(!event.shiftKey&&(document.activeElement===last||!nav.contains(document.activeElement))){event.preventDefault();first.focus();}}
 });
 window.addEventListener('hashchange',()=>{clearTimeout(searchTimer);if(drawer.open)closeDrawer();load();});
 matchMedia('(max-width:760px)').addEventListener('change',()=>{if(state.me&&pageNames[state.view])renderApp();});

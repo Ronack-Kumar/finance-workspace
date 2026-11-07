@@ -56,3 +56,65 @@ test('reduced motion keeps insights visible and keyboard search reaches records'
   await page.emulateMedia({reducedMotion:'reduce'});await demo(page);await expect(page.locator('.chart')).toHaveAttribute('data-live-running','false');await expect(page.getByRole('button',{name:'Resume insights',exact:true})).toBeDisabled();
   await page.keyboard.press('Control+k');await expect(page.getByRole('textbox',{name:'Search transactions',exact:true})).toBeFocused();
 });
+test('chart periods have one tab stop and retain keyboard selection when resized',async({page})=>{
+  await demo(page);
+  await page.getByRole('button',{name:'Pause insights',exact:true}).click();
+  const chart=page.getByRole('group',{name:/Income and expenses in INR/}),periods=chart.getByRole('button');
+  await page.keyboard.press('Tab');await expect(periods.first()).toBeFocused();
+  await page.keyboard.press('ArrowRight');await expect(periods.nth(1)).toBeFocused();
+  await expect(page.locator('.chart-tip')).toContainText('Net');
+  await page.keyboard.press('End');await expect(periods.last()).toBeFocused();
+  const selectedLabel=await periods.last().getAttribute('aria-label');
+  await page.setViewportSize({width:1100,height:900});
+  await expect(chart.getByRole('button',{name:selectedLabel!,exact:true})).toBeFocused();
+  await expect(chart.locator('[tabindex="0"]')).toHaveCount(1);
+  await page.keyboard.press('Escape');await expect(page.locator('.chart-tip')).not.toHaveClass(/visible/);
+  await expect(page.locator('.chart')).toHaveAttribute('data-live-running','false');
+  await page.keyboard.press('Home');await expect(periods.first()).toBeFocused();
+});
+test('server validation focuses the invalid amount and preserves the draft for correction',async({page})=>{
+  await demo(page);
+  const balance=await page.locator('[data-metric=balance]').innerText();
+  const add=page.getByRole('button',{name:'Add transaction',exact:true}).first();await add.click();
+  const amount=page.getByLabel('Amount in INR',{exact:true});
+  await amount.fill('0');await page.getByLabel('Description',{exact:true}).fill('Validation draft');await page.getByLabel('Category',{exact:true}).fill('Other');
+  await page.getByRole('dialog').getByRole('button',{name:'Add transaction',exact:true}).click();
+  await expect(amount).toBeFocused();await expect(amount).toHaveAttribute('aria-invalid','true');
+  await expect(amount).toHaveAccessibleDescription('Amount must be greater than zero.');
+  await expect(page.getByLabel('Description',{exact:true})).toHaveValue('Validation draft');
+  await expect(page.locator('[data-metric=balance]')).toHaveText(balance);
+  await amount.fill('1.25');await page.getByRole('dialog').getByRole('button',{name:'Add transaction',exact:true}).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();await expect(add).toBeFocused();
+  await expect(page.locator('#toast')).toHaveText('Transaction added.');
+});
+test('filters, custom dates, skip link and theme keep the current task reachable',async({page})=>{
+  await demo(page);await navigate(page,'Transactions');
+  const type=page.getByLabel('Transaction type',{exact:true});await type.focus();await type.selectOption('INCOME');
+  await expect(page.getByText(/12 records/)).toBeVisible();await expect(type).toBeFocused();
+  const period=page.getByLabel('Reporting period');await period.focus();await period.selectOption('custom');
+  await expect(page.getByLabel('From',{exact:true})).toBeFocused();
+  await page.getByRole('button',{name:'Apply dates',exact:true}).click();await expect(page.getByRole('button',{name:'Apply dates',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:'Apply dates',exact:true})).toBeFocused();
+  const skip=page.getByRole('link',{name:'Skip to content',exact:true});await skip.focus();await page.keyboard.press('Enter');
+  await expect(page.getByRole('main')).toBeFocused();await expect(page).toHaveURL(/#transactions$/);
+  await page.getByRole('link',{name:'Settings',exact:true}).click();await page.getByLabel('Full name',{exact:true}).fill('Unsaved profile');
+  const theme=page.getByRole('button',{name:'Switch theme',exact:true});await theme.click();
+  await expect(theme).toBeFocused();await expect(page.getByLabel('Full name',{exact:true})).toHaveValue('Unsaved profile');
+});
+test('offline action errors remain dismissible and return focus to the action',async({page,context})=>{
+  await demo(page);await page.clock.install();await context.setOffline(true);
+  const exportButton=page.getByRole('button',{name:'Export',exact:true});await exportButton.click();
+  const notice=page.locator('#toast');await expect(notice).toHaveAttribute('role','alert');
+  await expect(notice).toContainText(/fetch/i);await page.clock.fastForward(6000);
+  await expect(notice).toHaveClass(/visible/);await page.getByRole('button',{name:'Dismiss notification'}).click();
+  await expect(notice).toBeEmpty();await expect(exportButton).toBeFocused();
+  await context.setOffline(false);
+});
+test('mobile navigation contains keyboard focus and Escape restores the opener',async({page})=>{
+  await page.setViewportSize({width:390,height:844});await demo(page);
+  const open=page.getByRole('button',{name:'Open navigation'});await open.click();
+  await expect(page.getByRole('navigation',{name:'Main',exact:true}).getByRole('link',{name:'Overview',exact:true})).toBeFocused();
+  await page.getByRole('button',{name:'Sign out',exact:true}).focus();await page.keyboard.press('Tab');
+  await expect(page.getByRole('link',{name:'Finance Workspace',exact:true})).toBeFocused();
+  await page.keyboard.press('Shift+Tab');await expect(page.getByRole('button',{name:'Sign out',exact:true})).toBeFocused();
+  await page.keyboard.press('Escape');await expect(open).toBeFocused();await expect(open).toHaveAttribute('aria-expanded','false');
+});
