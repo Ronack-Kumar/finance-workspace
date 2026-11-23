@@ -4,7 +4,7 @@
 # For lasting data, switch to a paid plan and uncomment the disk.
 services:
   - type: web
-    name: finance-workspace
+    name: finance-space
     runtime: docker
     plan: free
     healthCheckPath: /health
@@ -14,7 +14,7 @@ services:
       - key: TRUST_PROXY_HOPS
         value: "1"
       - key: APP_ORIGIN
-        sync: false # e.g. https://finance-workspace.onrender.com (no trailing slash)
+        sync: false # e.g. https://finance-space.onrender.com (no trailing slash)
     # disk:
     #   name: finance-data
     #   mountPath: /app/data
