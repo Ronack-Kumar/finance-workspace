@@ -38,7 +38,7 @@ The named `finance-data` volume retains the database between container replaceme
 
 ## Render (free demo hosting)
 
-`render.yaml` deploys the Docker image as a Render web service. On render.com choose *New > Blueprint*, pick this repository, and set `APP_ORIGIN` to the service URL Render shows (for example `https://finance-workspace.onrender.com`, no trailing slash). The free plan sleeps when idle and does not keep the SQLite file between deploys, so treat it as a demo host; add the commented disk on a paid plan for real data.
+`render.yaml` deploys the Docker image as a Render web service. On render.com choose *New > Blueprint*, pick this repository, and set `APP_ORIGIN` to the service URL Render shows (for example `https://finance-space.onrender.com`, no trailing slash). The free plan sleeps when idle and does not keep the SQLite file between deploys, so treat it as a demo host; add the commented disk on a paid plan for real data.
 
 ## Without Docker
 
