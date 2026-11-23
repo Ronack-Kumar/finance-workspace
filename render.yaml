@@ -1,0 +1,21 @@
+# One-click deploy on Render (New > Blueprint > pick this repo).
+# Uses the existing Dockerfile. On the free plan the SQLite file is
+# reset on each redeploy, which suits the 24-hour demo workspaces.
+# For lasting data, switch to a paid plan and uncomment the disk.
+services:
+  - type: web
+    name: finance-workspace
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY_HOPS
+        value: "1"
+      - key: APP_ORIGIN
+        sync: false # e.g. https://finance-workspace.onrender.com (no trailing slash)
+    # disk:
+    #   name: finance-data
+    #   mountPath: /app/data
+    #   sizeGB: 1
