@@ -36,6 +36,10 @@ The named `finance-data` volume retains the database between container replaceme
 
 `GET /health` runs a database query and returns 200 with `{"status":"ok"}`, or 503 if unavailable. Configure the hosting provider's health check to use this endpoint. Monitor server error logs and disk space; application logs do not intentionally record passwords, cookies, or invitation tokens.
 
+## Render (free demo hosting)
+
+`render.yaml` deploys the Docker image as a Render web service. On render.com choose *New > Blueprint*, pick this repository, and set `APP_ORIGIN` to the service URL Render shows (for example `https://finance-workspace.onrender.com`, no trailing slash). The free plan sleeps when idle and does not keep the SQLite file between deploys, so treat it as a demo host; add the commented disk on a paid plan for real data.
+
 ## Without Docker
 
 Use Node 24 LTS. Set environment variables, then run:
